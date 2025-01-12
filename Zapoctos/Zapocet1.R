@@ -108,10 +108,15 @@ print(chi_square_result)
 # Mozaikový graf
 mosaicplot(table_obor_pohlavi, main = "Mozaikový graf: Pohlaví vs. Obor studia", color = TRUE)
 
-# hodnota kontingeční tabulky je větší než 0.05 tudíž není statisticky významný
-# vztah mezi pohlavím a volbou oboru.
-# podle grafu tam rozdíy vidět jsou
+# P-hodnota: Pokud je p-hodnota větší než 0.05, neexistuje dostatek důkazů pro odmítnutí nulové hypotézy, 
+# která předpokládá nezávislost mezi pohlavím a volbou oboru studia.
+# Mozaikový graf: I když chí-kvadrát test nenaznačuje statisticky významný vztah, 
+# může mozaikový graf ukázat určité vizuální rozdíly mezi skupinami.
 
+#  Na základě chí-kvadrát testu nebyl nalezen statisticky významný vztah mezi pohlavím a volbou oboru studia (p > 0.05).
+# To znamená, že podle těchto dat není pohlaví studentů spolehlivým prediktorem výběru oboru studia.
+# Nicméně vizuální analýza prostřednictvím mozaikového grafu naznačuje určité rozdíly,
+# které mohou být zajímavé pro další kvalitativní nebo kvantitativní analýzu.
 -------------------------------------------------------------------------------------------
 
 # Existuje souvislost mezi známkami  ze třetích ročníků SŠ 
