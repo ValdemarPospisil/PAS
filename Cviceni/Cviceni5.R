@@ -102,6 +102,8 @@ Q78<-quantile(dis,7/8)
 # porovnejte s klasickou spicatosti
 Kurt(dis)
 
+
+
 ##########################
 ### Vztah dvou promennych
 

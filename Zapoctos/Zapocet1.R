@@ -1,10 +1,42 @@
 library(ggplot2)
+library(readxl)
+library(MASS)
+library(asbio)
+library(moments)
+library(DescTools)
+VysledkyGEO <- read_excel("Data/prij.xlsx", 
+                          sheet = "Sheet1")
 
-#Je monžné považovat proměnnou ss3 za normálně rozdělenou?
-#histogram
+# -----------------------------------------------------------------------------------
+# 1. Je možné považovat proměnnou ss3 za normálně rozdělenou? K posouzení použijte vhodné grafy
+# a v případě odchylky od normality popište.
+mean_ss3 <- mean(VysledkyGEO$ss3, na.rm = TRUE)
+sd_ss3 <- sd(VysledkyGEO$ss3, na.rm = TRUE)
+
+# Histogram s přidanou normální křivkou
 ggplot(VysledkyGEO, aes(x=ss3)) +
-  geom_histogram(binwidth = 0.1, color = "black", fill="blue") +
-  labs(title = "Histogram průměrná známka z 3. ročníku", x="ss3", y="Frekvence")
+  geom_histogram(aes(y=..density..), binwidth = 0.1, color = "black", fill="blue") +
+  stat_function(fun = dnorm, args = list(mean = mean_ss3, sd = sd_ss3), color = "red", size = 1) +
+  labs(title = "Histogram průměrná známka z 3. ročníku", x="ss3", y="Hustota") +
+  theme_minimal()
+
+ggplot(VysledkyGEO, aes(sample = ss3)) +
+  stat_qq() +
+  stat_qq_line() +
+  labs(title = "Q-Q Plot pro ss3", x="Teoretické kvantily", y="Vzorkové kvantily") +
+  theme_minimal()
+
+ggplot(VysledkyGEO, aes(y = ss3)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Box Plot pro ss3", y="ss3") +
+  theme_minimal()
+
+ggplot(VysledkyGEO, aes(x=ss3)) +
+  geom_density(color = "blue", fill = "lightblue") +
+  stat_function(fun = dnorm, args = list(mean = mean(VysledkyGEO$ss3, na.rm = TRUE), sd = sd(VysledkyGEO$ss3, na.rm = TRUE)), color = "red") +
+  labs(title = "Density Plot pro ss3", x="ss3", y="Hustota") +
+  theme_minimal()
+
 
 ss3 <- VysledkyGEO$ss3
 # Q-Q plot
@@ -15,7 +47,7 @@ shapiro.test(ss3)
 # Kolmogorov_smirnov
 ks.test(ss3, "pnorm", mean(ss3), sd(ss3))
 
-library(moments)
+
 Skew(ss3)
 Kurt(ss3)
 
@@ -27,7 +59,7 @@ Kurt(ss3)
 ------------------------------------------------------------------------------------------------------
 
 # Spočtěte a interpretujte 95%-ní interval spolehlivosti pro celkový počet bodů u přijjímaček.
-library(DescTools)
+
 celprij <- VysledkyGEO$celprij
 sd_celprij <- sd(celprij)
 
@@ -89,16 +121,69 @@ mosaicplot(table_obor_pohlavi, main = "Mozaikový graf: Pohlaví vs. Obor studia
 # Rozptylový diagram
 ss3 <- VysledkyGEO$ss3
 celprij <- VysledkyGEO$celprij
-plot(ss3, celprij, main = "Rozptylový diagram: Známky ze třetích ročníků vs. Celkové body", 
-    xlab = "Známky ze třetích ročníků (ss3)", ylab = "Celkové body u přijímaček (celprij)")
 
-# Pearsonův korelační koeficient
-pearson_corr <- cor.test(ss3, celprij, method = "pearson")
-print(pearson_corr)
+correlation <- cor(ss3, celprij, method = "pearson")
+correlation
 
-# Spearmanův korelační koeficient
-spearman_corr <- cor.test(ss3, celprij, method = "spearman")
-print(spearman_corr)
+ggplot(data.frame(ss3, celprij), aes(x = ss3, y = celprij)) +
+  geom_point(color = "blue") +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  labs(title = "Scatter plot známek ze SŠ a počtu bodů u přijímaček", 
+       x = "Známky ze SŠ", y = "Počet bodů u přijímaček") +
+  theme_minimal()
+model <- lm(celprij ~ ss3, data = VysledkyGEO)
+summary(model)
 
+# Korelační koeficient rr se pohybuje v rozmezí od -1 do 1.
+# r>0r>0: Přímá závislost (zvyšování jedné proměnné zvyšuje druhou).
+# r<0r<0: Nepřímá závislost (zvyšování jedné proměnné snižuje druhou).
+# ∣r∣≈0∣r∣≈0: Slabá nebo žádná lineární závislost.
+# ∣r∣>0.7∣r∣>0.7: Silná závislost.
+# na základě pearson testu můžeme říci že souvislot je slabá a nepřímá jelikož korelace nám vyšla
+# -0.303 což je pud nulou tudíž je nepřímá a je to blízko nule tudíž je slabá.
+# graf pouze potvrzuje toto tvrzení jelikož tam není vidět skoro žádná souvislost.
 
+--------------------------------------------------------------------------------------------------
+
+# Porovnejte známky z matematické geografie a z geologie (proměné matzem a geol)
+# pomocí jejich tří kvartilů. Liší se od sebe kvartily těchto proměných?
+
+matzem <- VysledkyGEO$matzem
+geol <- VysledkyGEO$geol
+# Výpočet kvartilů pro obě proměnné
+quartiles_matzem <- quantile(matzem, probs = c(0.25, 0.5, 0.75))
+quartiles_geol <- quantile(geol, probs = c(0.25, 0.5, 0.75))
+
+# Zobrazení výsledků
+quartiles_matzem
+quartiles_geol
+
+# Připrava dat pro graf
+data <- data.frame(
+  Znamky = c(matzem, geol),
+  Predmet = rep(c("Matematická geografie", "Geologie"), each = length(matzem))
+)
+
+# Vytvoření boxplotu
+ggplot(data, aes(x = Predmet, y = Znamky, fill = Predmet)) +
+  geom_boxplot() +
+  labs(title = "Porovnání známek z matematické geografie a geologie", x = "Předmět", y = "Známky") +
+  theme_minimal()
+
+ggplot(data.frame(matzem), aes(x = matzem)) +
+  geom_histogram(binwidth = 0.5, fill = "skyblue", color = "black") +
+  labs(title = "Histogram známek z matematické geografie", x = "Známky", y = "Frekvence") +
+  theme_minimal()
+
+# Histogram pro geol
+ggplot(data.frame(geol), aes(x = geol)) +
+  geom_histogram(binwidth = 0.5, fill = "pink", color = "black") +
+  labs(title = "Histogram známek z geologie", x = "Známky", y = "Frekvence") +
+  theme_minimal()
+
+# I když u obou předmětů převldádá 2 jako známka, známky z geologie mají spíše 3 a a z matematické
+# geografie jsou spíše jedničky
+# tudíž se dá říci že geologie je těžší než matematická geografie aspoň co se známek studentů týče.
+
+-------------------------------------------------------------------------------------------
   
