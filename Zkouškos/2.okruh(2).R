@@ -1,64 +1,75 @@
-## (2) Bodové a intervalové odhady podílu a rozdílu podílu
+## (2) Bodové a intervalové odhady podílu a rozdílu podílů
 
-# podíl je statistická míra která udává, jak velká část z nějakého celku splňuje určitý požadavek.
-# měříme ho jako poměr mezi počtem úspěšných případů a celkovým počtem pozorování. (pouze binomický typ úloh)
+# Podíl je statistická míra, která udává, jak velká část z nějakého celku splňuje určitý požadavek.
+# Měříme ho jako poměr mezi počtem úspěšných případů a celkovým počtem pozorování (binomické úlohy).
 
-# příklad:
-# dvě třídy píšou stejný test
-# v první třídě test dalo 85 ze 100
-# v druhé třídě test dalo 70 ze 100
+# Příklad:
+# Dvě třídy píšou stejný test
+# V první třídě test dalo 85 ze 100
+# V druhé třídě test dalo 70 ze 100
 
-# podíl v první třídě
-podil1 <- 85/100
-# podíl v druhé třídě
-podil2 <- 70/100
+# Podíl v první třídě
+(podil1 <- 85/100)
+# Podíl v druhé třídě
+(podil2 <- 70/100)
 
-# rodíl podílu mezi dvěma třídami
-podil1 - podil2
-
+# Rozdíl podílů mezi dvěma třídami
+(podil1 - podil2)
 
 # Bodový odhad podílu
-# počet úspěchů / celkový počet pozorování ve vzorku
+# Počet úspěchů / celkový počet pozorování ve vzorku
+
+(otec <- Kojeni$Otec)
+
+# Odhad podílu
+(p <- prop.table(table(otec)))
+(n <- length(otec))
+
+(prop.table(table(otec))[1])
+
+# kritická hodnota pro 95 % interval
+(alpha <- 0.05)
+(q.n <- qnorm(1 - alpha / 2))
 
 # Intervalový odhad podílu
-# interval ve kterém s určitou pravděpodobnostní leží skutečný podíl v populaci
-# vzorec:
-#   p̂ +- z * sqrt((p̂*(1-p̂))/n) 
-# p̂ -> bodový odhad podílu
-# n -> velikost vzorku
-# z -> požadovaná spolehlivost
+(lower_bound_p <- p - q.n * sqrt(p * (1 - p) / n))
+(upper_bound_p <- p + q.n * sqrt(p * (1 - p) / n))
 
+(BinomCI(table(otec)[1], n, method = "wald"))
+(BinomCI(table(otec), n, method = "wald"))
 
-otec <- Kojeni$Otec
-
-# odhad podílu
-p <- prop.table(table(otec))
-
-n <- length(otec)
-
-prop.table(table(otec))[1]
-
-
-alpha <- 0.05
-q.n <- qnorm(1-alpha/2)
-
-p - q.n*sqrt(p*(1-p)/n)
-p + q.n*sqrt(p*(1-p)/n) 
-
-BinomCI(table(otec)[1], n, method = "wald")
-
-# Bodový odhad rozdílu podílu
+# Bodový odhad rozdílu podílů
 #   p̂1 - p̂2
 
-p1 <- 30 /50
-p2 <- 33/49
-p1 - p2
-# Intervalový odhad rozdílu podílu
-hoch <- Kojeni$Hoch
-otec <- Kojeni$Otec
+(p1 <- 30 / 50)
+(p2 <- 33 / 49)
+(p1 - p2)
+
+# Intervalový odhad rozdílu podílů
+#   vzorec viz finale
+(hoch <- Kojeni$Hoch)
+(otec <- Kojeni$Otec)
 
 (tab <- table(hoch, otec))
 
-BinomDiffCI(x1 = tab[1,1], n1 = tab[1,1] + tab[1+2], x2 = tab[2,1], n2 = tab[2,1] + tab[2+2], method ="wald")
+(BinomDiffCI(x1 = tab[1,1], n1 = tab[1,1] + tab[1+2], x2 = tab[2,1], n2 = tab[2,1] + tab[2+2], method ="wald"))
+
+# Výhody a nevýhody bodového a intervalového odhadu
+# Bodový odhad:
+#  + Jednoduchý na interpretaci
+#  + Rychlý výpočet
+#  - Neudává míru nejistoty
+#  - Může být nepřesný, pokud je vzorek malý
+
+# Intervalový odhad:
+#  + Udává míru nejistoty
+#  + Přesnější interpretace dat
+#  - Komplexnější výpočet
+#  - Šířka intervalu závisí na velikosti vzorku
+
+# Použití:
+# Bodový odhad se používá pro rychlou analýzu, kde není potřeba odhadovat přesnost.
+# Intervalový odhad se používá tam, kde chceme určit míru nejistoty, například při statistickém testování hypotéz.
+
 
 
